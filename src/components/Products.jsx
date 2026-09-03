@@ -4,6 +4,8 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 
+import useCart from '../context/useCart';
+
 const productsArr = [
   {
     title: 'Colors',
@@ -32,6 +34,8 @@ const productsArr = [
 ];
 
 function Products() {
+  const { addToCart } = useCart();
+
   return (
     <Container className="py-5">
       <h2 className="text-center mb-5">Products</h2>
@@ -44,23 +48,27 @@ function Products() {
                 variant="top"
                 src={product.imageUrl}
                 alt={product.title}
+                className="p-3"
                 style={{
                   height: '250px',
                   objectFit: 'contain',
                 }}
-                className="p-3"
               />
 
-              <Card.Body>
+              <Card.Body className="d-flex flex-column">
                 <Card.Title className="text-center">
                   {product.title}
                 </Card.Title>
 
-                <Card.Text className="text-center">
+                <Card.Text className="text-center fs-5">
                   ₹{product.price}
                 </Card.Text>
 
-                <Button variant="primary" className="w-100">
+                <Button
+                  variant="primary"
+                  className="mt-auto"
+                  onClick={() => addToCart(product)}
+                >
                   Add to Cart
                 </Button>
               </Card.Body>
