@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 
 import Container from 'react-bootstrap/Container';
@@ -5,17 +6,23 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
 
 import useCart from '../context/useCart';
 
 function Products() {
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
+      // 1. Start loading
+      setIsLoading(true);
+
       try {
+        // 2. Fetch data from backend
         const response = await fetch(
           'https://fakestoreapi.com/products'
         );
@@ -26,9 +33,13 @@ function Products() {
 
         const data = await response.json();
 
+        // 3. Store the data
         setProducts(data);
       } catch (error) {
         console.log(error.message);
+      } finally {
+        // 4. Stop loading
+        setIsLoading(false);
       }
     };
 
@@ -42,64 +53,81 @@ function Products() {
         Products
       </h2>
 
-      <Row className="g-4">
+      {/* Show loader while fetching */}
+      {isLoading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">
+              Loading...
+            </span>
+          </Spinner>
 
-        {products.map((product) => (
-          <Col
-            xs={12}
-            sm={6}
-            lg={3}
-            key={product.id}
-          >
+          <p className="mt-3">
+            Loading products...
+          </p>
+        </div>
+      ) : (
+        // Show products after loading is complete
+        <Row className="g-4">
 
-            <Card className="h-100 shadow-sm">
+          {products.map((product) => (
+            <Col
+              xs={12}
+              sm={6}
+              lg={3}
+              key={product.id}
+            >
 
-              <Card.Img
-                variant="top"
-                src={product.image}
-                alt={product.title}
-                className="p-3"
-                style={{
-                  height: '250px',
-                  objectFit: 'contain',
-                }}
-              />
+              <Card className="h-100 shadow-sm">
 
-              <Card.Body className="d-flex flex-column">
+                <Card.Img
+                  variant="top"
+                  src={product.image}
+                  alt={product.title}
+                  className="p-3"
+                  style={{
+                    height: '250px',
+                    objectFit: 'contain',
+                  }}
+                />
 
-                <Card.Title>
-                  {product.title}
-                </Card.Title>
+                <Card.Body className="d-flex flex-column">
 
-                <Card.Text>
-                  ₹{product.price}
-                </Card.Text>
+                  <Card.Title>
+                    {product.title}
+                  </Card.Title>
 
-                <Button
-                  variant="primary"
-                  className="mt-auto"
-                  onClick={() =>
-                    addToCart({
-                      title: product.title,
-                      price: product.price,
-                      imageUrl: product.image,
-                    })
-                  }
-                >
-                  Add to Cart
-                </Button>
+                  <Card.Text>
+                    ₹{product.price}
+                  </Card.Text>
 
-              </Card.Body>
+                  <Button
+                    variant="primary"
+                    className="mt-auto"
+                    onClick={() =>
+                      addToCart({
+                        title: product.title,
+                        price: product.price,
+                        imageUrl: product.image,
+                      })
+                    }
+                  >
+                    Add to Cart
+                  </Button>
 
-            </Card>
+                </Card.Body>
 
-          </Col>
-        ))}
+              </Card>
 
-      </Row>
+            </Col>
+          ))}
+
+        </Row>
+      )}
 
     </Container>
   );
 }
 
 export default Products;
+
