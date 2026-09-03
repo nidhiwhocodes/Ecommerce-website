@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -6,47 +8,55 @@ import Button from 'react-bootstrap/Button';
 
 import useCart from '../context/useCart';
 
-const productsArr = [
-  {
-    title: 'Colors',
-    price: 100,
-    imageUrl:
-      'https://prasadyash2411.github.io/ecom-website/img/Album%201.png',
-  },
-  {
-    title: 'Black and white Colors',
-    price: 50,
-    imageUrl:
-      'https://prasadyash2411.github.io/ecom-website/img/Album%202.png',
-  },
-  {
-    title: 'Yellow and Black Colors',
-    price: 70,
-    imageUrl:
-      'https://prasadyash2411.github.io/ecom-website/img/Album%203.png',
-  },
-  {
-    title: 'Blue Color',
-    price: 100,
-    imageUrl:
-      'https://prasadyash2411.github.io/ecom-website/img/Album%204.png',
-  },
-];
-
 function Products() {
+  const [products, setProducts] = useState([]);
+
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(
+          'https://fakestoreapi.com/products'
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+
+        const data = await response.json();
+
+        setProducts(data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <Container className="py-5">
-      <h2 className="text-center mb-5">Products</h2>
+
+      <h2 className="text-center mb-5">
+        Products
+      </h2>
 
       <Row className="g-4">
-        {productsArr.map((product) => (
-          <Col xs={12} sm={6} lg={3} key={product.title}>
+
+        {products.map((product) => (
+          <Col
+            xs={12}
+            sm={6}
+            lg={3}
+            key={product.id}
+          >
+
             <Card className="h-100 shadow-sm">
+
               <Card.Img
                 variant="top"
-                src={product.imageUrl}
+                src={product.image}
                 alt={product.title}
                 className="p-3"
                 style={{
@@ -56,26 +66,38 @@ function Products() {
               />
 
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="text-center">
+
+                <Card.Title>
                   {product.title}
                 </Card.Title>
 
-                <Card.Text className="text-center fs-5">
+                <Card.Text>
                   ₹{product.price}
                 </Card.Text>
 
                 <Button
                   variant="primary"
                   className="mt-auto"
-                  onClick={() => addToCart(product)}
+                  onClick={() =>
+                    addToCart({
+                      title: product.title,
+                      price: product.price,
+                      imageUrl: product.image,
+                    })
+                  }
                 >
                   Add to Cart
                 </Button>
+
               </Card.Body>
+
             </Card>
+
           </Col>
         ))}
+
       </Row>
+
     </Container>
   );
 }
