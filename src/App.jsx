@@ -12,6 +12,7 @@ import Cart from './components/Cart';
 
 import Home from './pages/Home';
 import About from './pages/About';
+import ProductDetails from './pages/ProductDetails';
 
 function App() {
   const [showCart, setShowCart] = useState(false);
@@ -25,27 +26,29 @@ function App() {
 
       <Routes>
 
-        {/* Home */}
         <Route
           path="/"
           element={<Home />}
         />
 
-        {/* Store */}
         <Route
           path="/store"
           element={<Products />}
         />
 
-        {/* About */}
         <Route
           path="/about"
           element={<About />}
         />
 
+        {/* Dynamic Product Page */}
+        <Route
+          path="/product/:productId"
+          element={<ProductDetails />}
+        />
+
       </Routes>
 
-      {/* Cart */}
       {showCart && (
         <Cart
           onClose={() => setShowCart(false)}
