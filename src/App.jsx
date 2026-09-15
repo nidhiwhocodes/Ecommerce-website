@@ -1,44 +1,53 @@
-import { useState } from "react";
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-import MyNavbar from "./components/Navbar";
-import Products from "./components/Products";
-import Cart from "./components/Cart";
-
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Login from "./pages/Login";
-import ProductDetails from "./pages/ProductDetails";
+import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const Login = lazy(() => import('./pages/Login'));
+const Products = lazy(() => import('./components/Products'));
+const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 
 function App() {
-  const [showCart, setShowCart] = useState(false);
-
   return (
     <BrowserRouter>
-      <MyNavbar onCartClick={() => setShowCart(true)} />
+      <Navbar />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <Suspense
+        fallback={
+          <div className="text-center py-5">
+            <h3>Loading...</h3>
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-<Route
-  path="/store"
-  element={
-    <ProtectedRoute>
-      <Products />
-    </ProtectedRoute>
-  }
-/>
-        <Route path="/about" element={<About />} />
+          <Route path="/about" element={<About />} />
 
-        {/* Dynamic Product Page */}
-        <Route path="/product/:productId" element={<ProductDetails />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+          <Route path="/login" element={<Login />} />
 
-      {showCart && <Cart onClose={() => setShowCart(false)} />}
+          <Route
+            path="/store"
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/product/:productId"
+            element={
+              <ProtectedRoute>
+                <ProductDetails />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
