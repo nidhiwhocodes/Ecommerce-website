@@ -8,8 +8,10 @@ import Cart from "./components/Cart";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
-import ProductDetails from "./pages/ProductDetails";
 import Login from "./pages/Login";
+import ProductDetails from "./pages/ProductDetails";
+import ProtectedRoute from './components/ProtectedRoute';
+
 
 function App() {
   const [showCart, setShowCart] = useState(false);
@@ -21,8 +23,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
 
-        <Route path="/store" element={<Products />} />
-
+<Route
+  path="/store"
+  element={
+    <ProtectedRoute>
+      <Products />
+    </ProtectedRoute>
+  }
+/>
         <Route path="/about" element={<About />} />
 
         {/* Dynamic Product Page */}
