@@ -1,93 +1,63 @@
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
-
+import { useEffect } from 'react';
 import useCart from '../context/useCart';
 
-function Cart({ onClose }) {
-  const { cartItems, removeFromCart } = useCart();
+function Cart() {
+  const {
+    cart,
+    fetchCart,
+    removeFromCart,
+  } = useCart();
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
 
   return (
-    <Container className="py-5">
-      
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Shopping Cart</h2>
+    <div className="container py-4">
+      <h2 className="text-center mb-4">Cart</h2>
 
-        <Button
-          variant="secondary"
-          onClick={onClose}
-        >
-          Continue Shopping
-        </Button>
-      </div>
-
-      {cartItems.length === 0 ? (
-        <h4 className="text-center mt-5">
-          Your cart is empty
-        </h4>
+      {cart.length === 0 ? (
+        <p className="text-center">
+          Your cart is empty.
+        </p>
       ) : (
-        <>
-          {cartItems.map((item) => (
-            <Card
-              className="mb-3 shadow-sm"
-              key={item.title}
+        cart.map((item) => (
+          <div
+            key={item._id}
+            className="d-flex align-items-center justify-content-between border-bottom py-3"
+          >
+            <div className="d-flex align-items-center">
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  objectFit: 'contain',
+                }}
+              />
+
+              <div className="ms-3">
+                <h5>{item.title}</h5>
+                <p className="mb-1">
+                  ₹{item.price}
+                </p>
+                <p className="mb-0">
+                  Quantity: {item.quantity}
+                </p>
+              </div>
+            </div>
+
+            <button
+              className="btn btn-danger"
+              onClick={() => removeFromCart(item._id)}
             >
-              <Card.Body>
-                <Row className="align-items-center">
-
-                  {/* Product Image */}
-                  <Col
-                    xs={12}
-                    md={3}
-                    className="text-center mb-3 mb-md-0"
-                  >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      style={{
-                        width: '120px',
-                        height: '120px',
-                        objectFit: 'contain',
-                      }}
-                    />
-                  </Col>
-
-                  {/* Product Name */}
-                  <Col xs={12} md={3} className="text-center">
-                    <h5>{item.title}</h5>
-                  </Col>
-
-                  {/* Price */}
-                  <Col xs={12} md={2} className="text-center">
-                    <strong>₹{item.price}</strong>
-                  </Col>
-
-                  {/* Quantity */}
-                  <Col xs={12} md={2} className="text-center">
-                    Quantity: {item.quantity}
-                  </Col>
-
-                  {/* Remove Button */}
-                  <Col xs={12} md={2} className="text-center mt-3 mt-md-0">
-                    <Button
-                      variant="danger"
-                      onClick={() =>
-                        removeFromCart(item.title)
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </Col>
-
-                </Row>
-              </Card.Body>
-            </Card>
-          ))}
-        </>
+              Remove
+            </button>
+          </div>
+        ))
       )}
-    </Container>
+    </div>
   );
 }
 

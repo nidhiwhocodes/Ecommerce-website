@@ -1,56 +1,93 @@
 import { useState } from 'react';
 import CartContext from './CartContext';
+import useAuth from './useAuth';
+
+const CRUDCRUD_URL =
+  'https://crudcrud.com/api/02b00a0ae0c8418fbd2abb58fabeaf72';
 
 function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
+  const [cart, setCart] = useState([]);
 
-  const addToCart = (product) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) => item.title === product.title
+  const { user } = useAuth();
+
+  // Add product to cart
+  const addToCart = async (product) => {
+    if (!user) {
+      return;
+    }
+
+    const cartItem = {
+      ...product,
+      quantity: 1,
+      userEmail: user.email,
+    };
+
+    try {
+      const response = await fetch(
+        `${CRUDCRUD_URL}/cart${user.email}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cartItem),
+        }
       );
 
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.title === product.title
-            ? {
-                ...item,
-                quantity: item.quantity + 1,
-              }
-            : item
-        );
+      if (!response.ok) {
+        throw new Error('Failed to add product to cart');
       }
 
-      return [
-        ...prevItems,
-        {
-          ...product,
-          quantity: 1,
-        },
-      ];
-    });
+      const data = await response.json();
+
+      console.log('Added to CrudCrud:', data);
+
+      setCart((prevCart) => [...prevCart, data]);
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
   };
 
-  const removeFromCart = (title) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.title !== title)
+  // Get cart items from CrudCrud
+  const fetchCart = async () => {
+    if (!user) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${CRUDCRUD_URL}/cart${user.email}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch cart');
+      }
+
+      const data = await response.json();
+
+      console.log('Cart from CrudCrud:', data);
+
+      setCart(data);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    }
+  };
+
+  const removeFromCart = (id) => {
+    setCart((prevCart) =>
+      prevCart.filter((item) => item._id !== id)
     );
   };
 
-  const cartItemCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+  const contextValue = {
+    cart,
+    addToCart,
+    fetchCart,
+    removeFromCart,
+  };
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        cartItemCount,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
